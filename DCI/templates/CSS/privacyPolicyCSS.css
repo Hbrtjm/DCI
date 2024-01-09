@@ -1,0 +1,32 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+}
+
+h1, h2 {
+    color: #0056b3;
+}
+
+p {
+    margin: 15px 0;
+}
+
+strong {
+    color: #004085;
+}
+
+main 
+{
+    background-color: rgb(187, 179, 179);
+    size:60%;
+}
