@@ -24,7 +24,7 @@ def coin_search(coin_name):
         data = response.json()
 
         # Extract the name and symbol for each cryptocurrency
-        crypto_list = []
+        crypto_list = ['BTC', 'ETH']
         for crypto in data:
             name = crypto['name']
             symbol = crypto['symbol'].upper()
@@ -74,4 +74,4 @@ def coin_search(coin_name):
     # finally:
     #     return []
     debug()
-coin_search("bitcoin")
+# coin_search("bitcoin")

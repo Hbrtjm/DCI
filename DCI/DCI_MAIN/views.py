@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .coin_search import coin_search
 from requests import get
+from .Model_and_others.trading_model import train_model
 import json
 # Create your views here.
 
@@ -17,6 +18,7 @@ def predict(request):
     context = {
         "name":"thing"
     }
+    train_model('BTC')
     return Response(context,status=status.HTTP_200_OK) 
 
 @api_view(['GET'])
