@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
+import yfinance as yf
 import torch
 from torch.utils.data import DataLoader, TensorDataset
+from datetime import datetime, timedelta
+
 try:
     from .data_request import StockDatabaseManager
 except:
@@ -82,7 +85,11 @@ def train_model(stock_name):
 
 def recall_model(stock_name,input_size=1):
     
-    model_path = f"{stock_name}_model_weights.pth"
+    from pathlib import Path
+    import os
+    # Setting BASE_DIR because of the import in the other module
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    model_path = os.path.join(BASE_DIR,f"Model_and_others/{stock_name}_model_weights.pth")
 
     # Redifine the model again
     model = SimpleNet(input_size=input_size)
@@ -93,18 +100,48 @@ def recall_model(stock_name,input_size=1):
 
     return model
 
-# In views we use predict(recall_model(stock_name,batch),currentdata(stock_name,batch)) 
+# In views we just use predict(stock_name) 
 
-def predict(model, data):
+def predict(stock_name):
+    def sigmoid(x):
+        return 1/(1 + np.exp(-x))
+    print("Getting the model")
+    model = recall_model(stock_name,1)
+    print("Getting current data")
+    current_data = get_current_data(stock_name,1)
+    print("Current data problem")
     with torch.no_grad():
-        data_tensor = torch.tensor(data,dtype=torch.float32).unsqueeze(1)
-        predictions = model(data_tensor)
-        return predictions.numpy()
+        data_tensor = torch.tensor(current_data,dtype=torch.float32).unsqueeze(1)
+        logits = model(data_tensor)
+        probabilities = sigmoid(logits)  # Apply sigmoid if not in the model
+        probabilities = probabilities.numpy()
+        
+        # Assuming 0.5 as the threshold for buy/sell recommendation
+        recommendations = ["Buy" if prob > 0.5 else "Sell" for prob in probabilities]
 
-stock_name = 'BTC'
+        return list(zip(probabilities, recommendations))
 
-def get_current_data(stock_name,batch_size):
-    return [130321.32]
+# Gets current stocks data
 
-predict(recall_model(stock_name,1),get_current_data(stock_name,1))
+def get_current_data(stock_name, batch_size):
+    # Calculate start and end times with a custom delay for historical data
+    delay = 50
+    end_time = datetime.now() - timedelta(days=delay)
+    start_time = end_time - timedelta(days=delay+1)
+
+    # Convert times to string format for yfinance
+    start_str = start_time.strftime('%Y-%m-%d')
+    end_str = end_time.strftime('%Y-%m-%d')
+
+    # Fetch data from yfinance
+    data = yf.download(stock_name, start=start_str, end=end_str, interval='1h')
+    print(data)
+    # Batch data
+    batched_data = [data.iloc[i:i + batch_size] for i in range(0, len(data), batch_size)]
+
+    return batched_data
+
+# batch_size = 1
+stock_name = "BTC"
+predict(stock_name)
 # train_model('BTC')

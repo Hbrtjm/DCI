@@ -29,6 +29,7 @@ class StockDatabaseManager:
 
             # Save data to a CSV file
             file_name = f'historical_{stock_name}.csv'
+            model_name = "NULL"
             hist_data.to_csv(file_name)
             print(f'Data saved to {file_name}')
 
